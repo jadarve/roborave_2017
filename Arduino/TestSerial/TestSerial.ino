@@ -81,8 +81,6 @@ void executeServoCommand(String command) {
 
   servoPan.write(v0);
   servoTilt.write(v1);
-  delay(10);
-  
 }
 
 
@@ -93,8 +91,8 @@ void executeMotorCommand(String command) {
 
 void setup() {
   Serial.begin(115200);
-  servoPan.attach(9);   // attaches the servo on pin 9 to the servo object
-  servoTilt.attach(10); // attaches the servo on pin 10 to the servo object
+  servoPan.attach(6);   // attaches the servo on pin 9 to the servo object
+  servoTilt.attach(11); // attaches the servo on pin 10 to the servo object
 
   // initialize digital pin LED_BUILTIN as an output.
   pinMode(LED_BUILTIN, OUTPUT);
