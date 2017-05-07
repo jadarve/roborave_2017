@@ -25,8 +25,8 @@ def orientationCallback(msg):
     # get the yaw pitch and roll from the quaternion
     yaw, pitch, roll = quaternion.q2Euler(q)
 
-    degYaw = int(((180 * yaw / np.pi) + 180))
-    degPitch = int(180 * pitch / np.pi)
+    degYaw = int(((180 * yaw / np.pi) + 180) / 2)
+    degPitch = int(((180 * pitch / np.pi) + 180) / 2)
 
     frameStr = servoFrame.format(degYaw, degPitch)
     print('{0} : {1} : {2}'.format(degYaw, degPitch, frameStr))
