@@ -1,8 +1,13 @@
 package construyelab.org.rospubsub;
 
+import android.app.VoiceInteractor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.vr.sdk.widgets.common.VrWidgetView;
+import com.google.vr.sdk.widgets.pano.VrPanoramaView;
+import com.google.vr.sdk.widgets.video.VrVideoEventListener;
 import com.google.vr.sdk.widgets.video.VrVideoView;
 
 import org.ros.android.MessageCallable;
@@ -16,6 +21,9 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
 import org.ros.node.topic.Publisher;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 import std_msgs.String;
 
@@ -44,6 +52,45 @@ public class VRActivity extends RosActivity {
         setContentView(R.layout.activity_vr);
 
         videoView = (VrVideoView)findViewById(R.id.VRVideoView);
+//        try {
+//            VrVideoView.Options opt = new VrVideoView.Options();
+//            opt.inputFormat = VrVideoView.Options.FORMAT_HLS;
+//            opt.inputType = VrVideoView.Options.TYPE_MONO;
+//            videoView.loadVideo(Uri.parse("http://127.0.0.1:8080/playlist.m3u8"), opt);
+////            videoView.playVideo();
+//        } catch(IOException e) {
+//
+//        }
+
+        vrView = videoView;
+//        vrView = (VrPanoramaView)findViewById(R.id.VRVideoView);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        Log.d("construyelab", "VRActivity.onResume(): playing video");
+        try {
+            VrVideoView.Options opt = new VrVideoView.Options();
+//            opt.inputFormat = VrVideoView.Options.FORMAT_HLS;
+//            opt.inputType = VrVideoView.Options.TYPE_MONO;
+//            videoView.loadVideo(Uri.parse("http://192.168.1.11:8080/playlist.m3u8"), opt);
+//            videoView.seekTo(videoView.getDuration() -1);
+
+            opt.inputFormat = VrVideoView.Options.FORMAT_DEFAULT;
+            opt.inputType = VrVideoView.Options.TYPE_MONO;
+            videoView.loadVideo(Uri.parse("http://192.168.1.11:8080/segment00000.ts"), opt);
+
+//            opt.inputFormat = VrVideoView.Options.FORMAT_DEFAULT;
+//            opt.inputType = VrVideoView.Options.TYPE_MONO;
+//            videoView.loadVideo(Uri.parse("rtp://192.168.1.11:5100"), opt);
+        } catch(IOException e) {
+
+        }
+        Log.d("construyelab", "VRActivity.onResume(): playing video moni");
+
+        vrView.resumeRendering();
     }
 
 
@@ -53,53 +100,11 @@ public class VRActivity extends RosActivity {
         NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(getRosHostname());
         nodeConfiguration.setMasterUri(getMasterUri());
 
-//        nodeMainExecutor.execute(new YawPitchPublisher(), nodeConfiguration);
-
-
+        nodeMainExecutor.execute(new YawPitchPublisher(vrView), nodeConfiguration);
 
     }
 
     com.google.vr.sdk.widgets.video.VrVideoView videoView;
-}
 
-class YawPitchPublisher implements NodeMain {
-
-    ///////////////////////////////////////////////////////
-    // CONSTRUCTORS
-    ///////////////////////////////////////////////////////
-
-    public YawPitchPublisher(VrVideoView videoView) {
-
-    }
-
-    @Override
-    public GraphName getDefaultNodeName() {
-        return GraphName.of("YawPitchPublisher");
-    }
-
-    @Override
-    public void onStart(ConnectedNode connectedNode) {
-
-        publisher = connectedNode.newPublisher("phone/head_orientation", "geometry_msgs/Vector3");
-
-
-    }
-
-    @Override
-    public void onShutdown(Node node) {
-
-    }
-
-    @Override
-    public void onShutdownComplete(Node node) {
-
-    }
-
-    @Override
-    public void onError(Node node, Throwable throwable) {
-
-    }
-
-    private VrVideoView videoView;
-    private Publisher<geometry_msgs.Vector3> publisher;
+    private VrWidgetView vrView;
 }

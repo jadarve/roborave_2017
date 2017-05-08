@@ -38,6 +38,7 @@ dependencies {
     compile 'com.google.vr:sdk-audio:1.10.0'
     compile 'com.google.vr:sdk-base:1.10.0'
     compile 'com.google.vr:sdk-videowidget:1.10.0'
+    compile 'com.google.vr:sdk-panowidget:1.10.0'
     compile 'org.ros.android_core:android_10:[0.3,0.4)'
 
     testCompile 'junit:junit:4.12'
