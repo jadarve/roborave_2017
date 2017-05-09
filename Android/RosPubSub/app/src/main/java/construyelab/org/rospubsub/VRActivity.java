@@ -80,7 +80,7 @@ public class VRActivity extends RosActivity {
 
             opt.inputFormat = VrVideoView.Options.FORMAT_DEFAULT;
             opt.inputType = VrVideoView.Options.TYPE_MONO;
-            videoView.loadVideo(Uri.parse("http://192.168.1.11:8080/segment00000.ts"), opt);
+            videoView.loadVideo(Uri.parse("http://192.168.1.32:8080/300.avi"), opt);
 
 //            opt.inputFormat = VrVideoView.Options.FORMAT_DEFAULT;
 //            opt.inputType = VrVideoView.Options.TYPE_MONO;
