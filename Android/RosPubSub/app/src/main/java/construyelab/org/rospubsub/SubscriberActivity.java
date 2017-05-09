@@ -64,7 +64,6 @@ public class SubscriberActivity extends RosActivity {
 //        nodeMainExecutor.execute(new NodeExample(), nodeConfiguration);
 
         nodeMainExecutor.execute(new OrientationPublisher(this), nodeConfiguration);
-
     }
 
 

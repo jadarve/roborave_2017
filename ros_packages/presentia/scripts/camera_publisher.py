@@ -47,7 +47,7 @@ import cv2
 import numpy as np
 
 from geometry_msgs.msg import Twist
-from cv_bridge import CvBridge, CvBridgeError
+# from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image, CompressedImage
 
 class CameraPublisher(object):
@@ -64,8 +64,8 @@ class CameraPublisher(object):
         else:
             rospy.loginfo('CameraPublisher: capture device found')
         
-        self.__capture.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, resolution[0])
-        self.__capture.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, resolution[1])
+        self.__capture.set(cv2.CAP_PROP_FRAME_WIDTH, resolution[0])
+        self.__capture.set(cv2.CAP_PROP_FRAME_HEIGHT, resolution[1])
     
         rospy.loginfo('CameraPublisher: starting capture loop')
         self.__imgThread = threading.Thread(target=self.__imageLoop)
@@ -81,7 +81,7 @@ class CameraPublisher(object):
         """
         
         # 10 Hz frame rate
-        self.__rate = rospy.Rate(10)
+        self.__rate = rospy.Rate(30)
         
         while not rospy.is_shutdown():
             
@@ -95,7 +95,7 @@ class CameraPublisher(object):
                     imgMsg = CompressedImage()
                     imgMsg.header.stamp = rospy.Time.now()
                     imgMsg.format = 'jpeg'
-                    imgMsg.data = np.array(cv2.imencode('.jpg', self.__imgBGR)[1]).tostring()
+                    imgMsg.data = np.array(cv2.imencode('.jpeg', self.__imgBGR)[1]).tostring()
                      
                     # publish the image
                     self.__publisher.publish(imgMsg)
@@ -111,6 +111,11 @@ class CameraPublisher(object):
             except Exception as e:
                 rospy.logerr('CameraPublisher: error reading image frame: {0}'.format(e.errmsg))
 
+
+    def close(self):
+
+        self.__capture.release()
+
 ###########################################################
 # ENTRY POINT
 ###########################################################
@@ -123,7 +128,7 @@ if __name__ == '__main__':
     # read node parameters
     topic = rospy.get_param('camera_publisher/topic', 'camera/image_color/compressed')
     camindex = rospy.get_param('camera_publisher/camera', 0)
-    resolution = rospy.get_param('camera_publisher/resolution', [320, 240])
+    resolution = rospy.get_param('camera_publisher/resolution', [240, 240])
     
     rospy.loginfo('topic name: {0}'.format(topic))
     rospy.loginfo('camera index: {0}'.format(camindex))
@@ -136,4 +141,5 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         rospy.loginfo('camera_publisher: keyboard interrupt, shutting down')
     
+    webCamPub.close()
     cv2.destroyAllWindows()

@@ -1,12 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <ImageView
+        android:id="@+id/ImageLeft"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.5"/>
+
+    <ImageView
+        android:id="@+id/ImageRight"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.5"/>
 
     <com.google.vr.sdk.widgets.pano.VrPanoramaView
-    android:id="@+id/VrImageView"
-    android:layout_height="match_parent"
-    android:layout_width="match_parent"
-    />
+        android:id="@+id/VrImageView"
+        android:layout_height="1dp"
+        android:layout_width="1dp"
+        />
 
 </LinearLayout>
