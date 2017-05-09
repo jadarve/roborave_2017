@@ -162,6 +162,7 @@ include_directories(
 install(PROGRAMS
   scripts/vehicle_control.py
   scripts/servo_control.py
+  scripts/camera_publisher.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
