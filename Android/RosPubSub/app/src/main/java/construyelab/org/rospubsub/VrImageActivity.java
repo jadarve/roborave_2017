@@ -9,6 +9,9 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.InputDevice;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -27,6 +30,7 @@ import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
+import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
 import sensor_msgs.CompressedImage;
@@ -99,12 +103,183 @@ public class VrImageActivity extends RosActivity {
         nodeMainExecutor.execute(new YawPitchPublisher(imageView), nodeConfiguration);
         nodeMainExecutor.execute(new ImageSubscriber(imageView, imageLeft, imageRight), nodeConfiguration);
 
+        joystickPublisher = new JoystickPublisher();
+        nodeMainExecutor.execute(joystickPublisher, nodeConfiguration);
+
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        boolean handled = false;
+        if ((event.getSource() & InputDevice.SOURCE_GAMEPAD)
+                == InputDevice.SOURCE_GAMEPAD) {
+            if (event.getRepeatCount() == 0) {
+//                showlog("onKeyDown: " + keyCode);
+//                switch (keyCode) {
+//                    // Handle gamepad and D-pad button presses to
+//                    // navigate the ship
+//
+//                    default:
+//                        if (isFireKey(keyCode)) {
+//                            // Update the ship object to fire lasers
+//                            handled = true;
+//                        }
+//                        break;
+//                }
+            }
+            if (handled) {
+                return true;
+            }
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        // Check that the event came from a game controller
+        if ((event.getSource() & InputDevice.SOURCE_JOYSTICK) ==
+                InputDevice.SOURCE_JOYSTICK &&
+                event.getAction() == MotionEvent.ACTION_MOVE) {
+
+            // Process all historical movement samples in the batch
+            final int historySize = event.getHistorySize();
+
+            // Process the movements starting from the
+            // earliest historical position in the batch
+            for (int i = 0; i < historySize; i++) {
+                // Process the event at historical position i
+                processJoystickInput(event, i);
+            }
+
+            // Process the current movement sample in the batch (position -1)
+            processJoystickInput(event, -1);
+            return true;
+        }
+
+        return super.onGenericMotionEvent(event);
+    }
+
+    private void processJoystickInput(MotionEvent event, int historyPos) {
+
+        InputDevice mInputDevice = event.getDevice();
+
+        // Calculate the horizontal distance to move by
+        // using the input value from one of these physical controls:
+        // the left control stick, hat axis, or the right control stick.
+        float x = getCenteredAxis(event, mInputDevice,
+                MotionEvent.AXIS_X, historyPos);
+        if (x == 0) {
+            x = getCenteredAxis(event, mInputDevice,
+                    MotionEvent.AXIS_HAT_X, historyPos);
+        }
+        if (x == 0) {
+            x = getCenteredAxis(event, mInputDevice,
+                    MotionEvent.AXIS_Z, historyPos);
+        }
+
+        // Calculate the vertical distance to move by
+        // using the input value from one of these physical controls:
+        // the left control stick, hat switch, or the right control stick.
+        float y = getCenteredAxis(event, mInputDevice,
+                MotionEvent.AXIS_Y, historyPos);
+        if (y == 0) {
+            y = getCenteredAxis(event, mInputDevice,
+                    MotionEvent.AXIS_HAT_Y, historyPos);
+        }
+        if (y == 0) {
+            y = getCenteredAxis(event, mInputDevice,
+                    MotionEvent.AXIS_RZ, historyPos);
+        }
+
+        // Update the ship object based on the new x and y values
+        Log.i("CONTROL", "processJoystickInput x: " + x);
+        Log.i("CONTROL", "processJoystickInput y: " + y);
+
+        joystickPublisher.publishMessage(200 * x, 200 * -y);
+
+//        FIXME: ROS
+//        if (getBluetoothService().getIsBTConnected()) {
+//            sendMessage("m;" +
+//                    (int) (-y * 200) +
+//                    ";" +
+//                    (int) (x * 200)
+//            );
+//        }
+    }
+
+    private static float getCenteredAxis(MotionEvent event, InputDevice device, int axis, int historyPos) {
+        final InputDevice.MotionRange range =
+                device.getMotionRange(axis, event.getSource());
+
+        // A joystick at rest does not always report an absolute position of
+        // (0,0). Use the getFlat() method to determine the range of values
+        // bounding the joystick axis center.
+        if (range != null) {
+            final float flat = range.getFlat();
+            final float value =
+                    historyPos < 0 ? event.getAxisValue(axis) :
+                            event.getHistoricalAxisValue(axis, historyPos);
+
+            // Ignore axis values that are within the 'flat' region of the
+            // joystick axis center.
+            if (Math.abs(value) > flat) {
+                return value;
+            }
+        }
+        return 0;
     }
 
     private VrPanoramaView imageView;
     private ImageView imageLeft;
     private ImageView imageRight;
+
+    private JoystickPublisher joystickPublisher;
 }
+
+
+class JoystickPublisher implements NodeMain {
+
+
+
+    Publisher<geometry_msgs.Vector3> publisher;
+
+    @Override
+    public GraphName getDefaultNodeName() {
+        return GraphName.of("joystick_publisher");
+    }
+
+    @Override
+    public void onStart(ConnectedNode connectedNode) {
+
+        publisher = connectedNode.newPublisher("phone/joystick", "geometry_msgs/Vector3");
+    }
+
+    @Override
+    public void onShutdown(Node node) {
+
+    }
+
+    @Override
+    public void onShutdownComplete(Node node) {
+
+    }
+
+    @Override
+    public void onError(Node node, Throwable throwable) {
+
+    }
+
+
+    public void publishMessage(float x, float y) {
+
+        geometry_msgs.Vector3 msg = publisher.newMessage();
+
+        msg.setX(x);
+        msg.setY(y);
+        publisher.publish(msg);
+    }
+}
+
 
 class ImageSubscriber implements NodeMain, MessageListener<sensor_msgs.CompressedImage> {
 
