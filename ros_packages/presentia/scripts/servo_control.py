@@ -39,11 +39,8 @@ if __name__ == '__main__':
     serialPort = serial.Serial('/dev/ttyUSB0', 115200, )  # open serial port
     rospy.loginfo('serial port: ' + serialPort.name)         # check which port was really used
     
-    #ser.close()             # close port
-
     orientationSubscriber = rospy.Subscriber('phone/head_orientation',
         Vector3, orientationCallback, queue_size=1)
-
 
     rospy.spin()
 
