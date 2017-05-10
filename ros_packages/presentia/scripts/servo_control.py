@@ -3,6 +3,7 @@
 import array
 import serial
 import numpy as np
+import time
 
 import rospy
 from geometry_msgs.msg import QuaternionStamped
@@ -22,11 +23,12 @@ def orientationCallback(msg):
     _, degYaw, degPitch = int(msg.x), int(msg.y) + 90, int(msg.z) + 35
 
     frameStr = servoFrame.format(degYaw, degPitch)
-    print('{0} : {1} : {2}'.format(degYaw, degPitch, frameStr))
+    # print('{0} : {1} : {2}'.format(degYaw, degPitch, frameStr))
 
     # rotate de vehicle or pantilt according to the yaw value
     serialPort.write(array.array('b', frameStr))
     serialPort.flush()
+    # time.sleep(0.1)
 
 
 if __name__ == '__main__':
@@ -36,7 +38,7 @@ if __name__ == '__main__':
     rospy.init_node('servo_control')
     rospy.loginfo('servo_control node started')
 
-    serialPort = serial.Serial('/dev/ttyUSB0', 115200, )  # open serial port
+    serialPort = serial.Serial('/dev/ttyACM0', 115200, )  # open serial port
     rospy.loginfo('serial port: ' + serialPort.name)         # check which port was really used
     
     orientationSubscriber = rospy.Subscriber('phone/head_orientation',

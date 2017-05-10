@@ -32,7 +32,7 @@ String serialCommand;
 
 void parseCommand(String command) {
 
-  Serial.println(command);
+  // Serial.println(command);
   char commandCode = command.charAt(0);
 
   // servo command
@@ -65,18 +65,18 @@ void executeServoCommand(String command) {
   int end = 0;
   int v0 = getInt(command, 1, end);
 
-  Serial.print("end: ");
-  Serial.print(end);
+  // Serial.print("end: ");
+  // Serial.print(end);
   
   int v1 = getInt(command, end +1, end);
 
-  Serial.print("end: ");
-  Serial.print(end);
+  // Serial.print("end: ");
+  // Serial.print(end);
 
-  Serial.print("v0: ");
-  Serial.print(v0);
-  Serial.print(" v1: ");
-  Serial.println(v1);
+  // Serial.print("v0: ");
+  // Serial.print(v0);
+  // Serial.print(" v1: ");
+  // Serial.println(v1);
 
 
   servoPan.write(v0);
