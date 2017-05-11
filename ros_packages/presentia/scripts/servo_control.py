@@ -19,14 +19,18 @@ def orientationCallback(msg):
 
     global servoFrame
 
-    _, degYaw, degPitch = int(msg.x), int(msg.y) + 90, int(msg.z) + 35
+    degYaw, degPitch = max(0, min(int(msg.y) + 90, 180)), int(msg.z) + 35
+    sendServoCommand(degYaw, degPitch)
 
+
+def sendServoCommand(degYaw, degPitch):
+    
     frameStr = servoFrame.format(degYaw, degPitch)
     print('{0} : {1} : {2}'.format(degYaw, degPitch, frameStr))
 
     # rotate de vehicle or pantilt according to the yaw value
     serialPort.write(array.array('b', frameStr))
-    serialPort.flush()
+    serialPort.flush()    
 
 
 if __name__ == '__main__':
@@ -36,17 +40,17 @@ if __name__ == '__main__':
     rospy.init_node('servo_control')
     rospy.loginfo('servo_control node started')
 
-    serialPort = serial.Serial('/dev/ttyUSB0', 115200, )  # open serial port
+    serialPort = serial.Serial('/dev/ttyACM0', 115200)       # open serial port
     rospy.loginfo('serial port: ' + serialPort.name)         # check which port was really used
     
-    #ser.close()             # close port
+    # recenter the servos
+    sendServoCommand(90, 35)
 
-    orientationSubscriber = rospy.Subscriber('phone/head_orientation',
-        Vector3, orientationCallback, queue_size=1)
+    # orientationSubscriber = rospy.Subscriber('phone/head_orientation',
+    #     Vector3, orientationCallback, queue_size=1)
 
 
     rospy.spin()
-
     serialPort.close()
 
     rospy.loginfo('servo_control node finished')
