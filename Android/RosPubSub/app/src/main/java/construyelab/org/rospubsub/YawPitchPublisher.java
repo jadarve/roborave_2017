@@ -21,10 +21,14 @@ public class YawPitchPublisher implements NodeMain {
     // CONSTRUCTORS
     ///////////////////////////////////////////////////////
 
-    public YawPitchPublisher(VrWidgetView videoView) {
-        this.videoView = videoView;
+    public YawPitchPublisher(VrWidgetView vrView) {
+        this.vrView = vrView;
 
         yawAndPitch = new float[2];
+    }
+
+    public void setView(VrWidgetView view) {
+        this.vrView = view;
     }
 
     @Override
@@ -41,7 +45,7 @@ public class YawPitchPublisher implements NodeMain {
             @Override
             protected void loop() throws InterruptedException {
 
-                videoView.getHeadRotation(yawAndPitch);
+                vrView.getHeadRotation(yawAndPitch);
 
                 geometry_msgs.Vector3 vec = publisher.newMessage();
                 vec.setX(0);        // no roll
@@ -74,7 +78,7 @@ public class YawPitchPublisher implements NodeMain {
 
     }
 
-    private VrWidgetView videoView;
+    private VrWidgetView vrView;
     private float[] yawAndPitch;
     private Publisher<Vector3> publisher;
 }

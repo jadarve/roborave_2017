@@ -16,7 +16,9 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
+import com.google.vr.sdk.base.GvrView;
 import com.google.vr.sdk.widgets.common.VrWidgetView;
 import com.google.vr.sdk.widgets.pano.VrPanoramaView;
 import com.google.vr.sdk.widgets.video.VrVideoView;
@@ -39,7 +41,7 @@ import sensor_msgs.CompressedImage;
  * Created by jadarve on 8/05/17.
  */
 
-public class VrImageActivity extends RosActivity {
+public class VrImageActivity extends RosActivity implements View.OnClickListener {
 
 
     ///////////////////////////////////////////////////////
@@ -63,11 +65,17 @@ public class VrImageActivity extends RosActivity {
 //                WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_vr_image);
+
+        vrImageActivityLayout = (LinearLayout)findViewById(R.id.VrImageActivityLayout);
+
         imageView = (VrPanoramaView)findViewById(R.id.VrImageView);
         imageView.setVisibility(View.INVISIBLE);
 
         imageLeft = (ImageView)findViewById(R.id.ImageLeft);
         imageRight = (ImageView)findViewById(R.id.ImageRight);
+
+        imageLeft.setOnClickListener(this);
+        imageRight.setOnClickListener(this);
     }
 
     @Override
@@ -100,7 +108,9 @@ public class VrImageActivity extends RosActivity {
         NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(getRosHostname());
         nodeConfiguration.setMasterUri(getMasterUri());
 
-        nodeMainExecutor.execute(new YawPitchPublisher(imageView), nodeConfiguration);
+        yawPitchPublisher = new YawPitchPublisher(imageView);
+
+        nodeMainExecutor.execute(yawPitchPublisher, nodeConfiguration);
         nodeMainExecutor.execute(new ImageSubscriber(imageView, imageLeft, imageRight), nodeConfiguration);
 
         joystickPublisher = new JoystickPublisher();
@@ -159,6 +169,21 @@ public class VrImageActivity extends RosActivity {
         return super.onGenericMotionEvent(event);
     }
 
+    @Override
+    public void onClick(View v) {
+
+//        vrImageActivityLayout.removeView(imageView);
+//
+//        // instantiate a new image view with default head orientation
+//        imageView = new VrPanoramaView(getApplicationContext());
+//        imageView.setLayoutParams(new LinearLayout.LayoutParams(1, 1));
+//        vrImageActivityLayout.addView(imageView);
+//
+//
+//
+//        yawPitchPublisher.setView(imageView);
+    }
+
     private void processJoystickInput(MotionEvent event, int historyPos) {
 
         InputDevice mInputDevice = event.getDevice();
@@ -195,7 +220,8 @@ public class VrImageActivity extends RosActivity {
         Log.i("CONTROL", "processJoystickInput x: " + x);
         Log.i("CONTROL", "processJoystickInput y: " + y);
 
-        joystickPublisher.publishMessage(200 * x, 200 * -y);
+        joystickPublisher.publishMessage(200 * -y, 200 * x);
+
 
 //        FIXME: ROS
 //        if (getBluetoothService().getIsBTConnected()) {
@@ -229,11 +255,16 @@ public class VrImageActivity extends RosActivity {
         return 0;
     }
 
+    private LinearLayout vrImageActivityLayout;
+
+    private YawPitchPublisher yawPitchPublisher;
+
     private VrPanoramaView imageView;
     private ImageView imageLeft;
     private ImageView imageRight;
 
     private JoystickPublisher joystickPublisher;
+
 }
 
 

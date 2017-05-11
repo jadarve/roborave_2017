@@ -92,7 +92,7 @@ class CameraPublisher(object):
                 if self.__imgBGR != None:
 
                     # vertical flip
-                    self.__imgBGR = cv2.flip(self.__imgBGR)
+                    self.__imgBGR = cv2.flip(self.__imgBGR, flipCode=-1)
                     
                     # creates a compressed image message
                     imgMsg = CompressedImage()
@@ -112,7 +112,7 @@ class CameraPublisher(object):
                 self.__rate.sleep()
                 
             except Exception as e:
-                rospy.logerr('CameraPublisher: error reading image frame: {0}'.format(e.errmsg))
+                rospy.logerr('CameraPublisher: error reading image frame: {0}'.format(e))
 
 
     def close(self):

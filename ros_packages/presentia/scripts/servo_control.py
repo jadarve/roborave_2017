@@ -13,14 +13,15 @@ import quaternion
 
 
 serialPort = None
-servoFrame = 'S{0:d};{1:d};\n'
+servoFrame = 'S;{0:d};{1:d};\n'
 
 
 def orientationCallback(msg):
 
     global servoFrame
 
-    degYaw, degPitch = max(0, min(int(msg.y) + 90, 180)), int(msg.z) + 35
+    # degYaw, degPitch = max(0, min(int(msg.y) + 90, 180)), int(msg.z) + 35
+    degYaw, degPitch = max(0, 90 - min(int(msg.y), 180)), int(msg.z) + 35
     sendServoCommand(degYaw, degPitch)
 
 
@@ -45,10 +46,11 @@ if __name__ == '__main__':
     rospy.loginfo('serial port: ' + serialPort.name)         # check which port was really used
     
     # recenter the servos
-    sendServoCommand(90, 35)
+    sendServoCommand(90, 65)
+    time.sleep(0.5)
 
-    # orientationSubscriber = rospy.Subscriber('phone/head_orientation',
-    #     Vector3, orientationCallback, queue_size=1)
+    orientationSubscriber = rospy.Subscriber('phone/head_orientation',
+        Vector3, orientationCallback, queue_size=1)
 
 
     rospy.spin()
