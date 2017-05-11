@@ -42,7 +42,9 @@ if __name__ == '__main__':
     rospy.init_node('servo_control')
     rospy.loginfo('servo_control node started')
 
-    serialPort = serial.Serial('/dev/ttyACM0', 115200)       # open serial port
+    portStr = rospy.get_param('vehicle_control/serialPort', '/dev/ttyACM0')
+
+    serialPort = serial.Serial(portStr, 115200)              # open serial port
     rospy.loginfo('serial port: ' + serialPort.name)         # check which port was really used
     
     # recenter the servos

@@ -1,0 +1,11 @@
+<launch>
+    <node pkg="presentia" type="camera_publisher" name="camera_publisher"/>
+
+    <node pkg="presentia" type="servo_control" name="servo_control">
+        <param name="serial_port" value="/dev/ttyACM0" />
+    </node>
+
+    <node pkg="presentia" type="vehicle_control" name="vehicle_control">
+        <param name="serial_port" value="/dev/ttyACM1" />
+    </node>
+</launch>
