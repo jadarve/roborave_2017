@@ -51,7 +51,7 @@ public class YawPitchPublisher implements NodeMain {
                 publisher.publish(vec);
 
 //                Log.d("construyelab", "YawPitchPublisher.loop(): " + Arrays.toString(yawAndPitch));
-                Thread.sleep(10);
+                Thread.sleep(20);
             }
         };
 

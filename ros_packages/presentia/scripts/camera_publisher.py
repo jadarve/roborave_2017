@@ -90,6 +90,9 @@ class CameraPublisher(object):
                 self.__imgBGR = self.__capture.read()[1]
                 
                 if self.__imgBGR != None:
+
+                    # vertical flip
+                    self.__imgBGR = cv2.flip(self.__imgBGR)
                     
                     # creates a compressed image message
                     imgMsg = CompressedImage()
